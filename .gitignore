@@ -1,1 +1,5 @@
 .idea
+amity/__init__.pyc
+amity/amity.pyc
+amity/person.pyc
+amity/room.pyc
