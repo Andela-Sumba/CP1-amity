@@ -69,11 +69,11 @@ def app_header():
    """
     os.system("clear")
     print("\n")
-    cprint(figlet_format('Amity', font='roman'), 'green')
+    cprint(figlet_format('AMITY', font='roman'), 'green')
     cprint('--------------------------------------------------------------------------', 'magenta')
-    cprint("\t\tAmity is a simple Commandline Room Allocation App.", 'yellow')
+    cprint("\tAmity is a simple Commandline Room Allocation App.", 'yellow')
     cprint('--------------------------------------------------------------------------', 'magenta')
-    cprint("\n\tNew to the app? Type 'help' to see a full list of commands\n", 'white')
+    cprint("\n\tType 'help' to see a full list of commands\n", 'white')
 
 def custom_print(arg, color='green'):
     """ This is a simple print function that adds color to printed output. """
@@ -83,7 +83,7 @@ class AmityCLI(cmd.Cmd):
     """
         This class creates Amity Command Line Interface for user interaction
     """
-    app_prompt = colored('Amity > ', 'green', attrs=['bold'])
+    app_prompt = colored('Amity => ', 'green', attrs=['bold'])
     prompt = app_prompt
 
     @docopt_cmd
