@@ -57,3 +57,13 @@ class Amity(object):
                  successfully, and added to living space successfully
         """
         pass
+
+    def reallocate_person(self, id_no, room_name):
+        """
+        Reallocates person use the person id number from a certain room to another room
+        ______________________________________________________________________________
+        :param id_no: unique identifier for the person to be reallocated
+        :param room_name: name of the room person to be relocated to
+        :return: Success message that person has be successfully reallocate
+        """
+        pass
