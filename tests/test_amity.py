@@ -83,13 +83,36 @@ class TestAmity(unittest.TestCase):
         self.assertEqual(1, len(self.amity.offices["venus"]))
         self.assertEqual(5, len(self.amity.offices["void"]))
 
-    @unittest.skip("WIP")
     def test_print_room(self):
-        pass
+        response = self.amity.print_room("void")
+        self.assertEqual(response, "The people in room void are:"
+                                   "____________________________"
+                                   "Daniel Sumba"
+                                   "Roronoa Zoro"
+                                   "Vinsmoke Sanji"
+                                   "Roronoa Zoro"
+                                   "Excalibur Teno"
+                                   "Bosalino kizaru")
 
-    @unittest.skip("WIP")
+    def test_amity_print_empty_room(self):
+        self.amity.create_room("livingspace", ["jupiter"])
+        response = self.amity.print_room("jupiter")
+        self.assertEqual(response, "The room jupiter is empty!!")
+
+
     def test_print_unallocated(self):
-        pass
+        """The that amity output to a file and that the file exists"""
+        self.amity.print_unallocated({"--o": "test_unallocated.txt"})
+        self.assertTrue(os.path.exists("test_unallocated.txt"))
+        os.remove("test_unallocated.txt")
+
+
+    def test_load_people(self):
+        """Test that amity can add people from a .txt file"""
+        self.amity.load_people({"<filename>": "test_people.txt"})
+        self.assertEqual(13, len(self.amity.employees))
+        self.assertEqual(7, len(self.amity.fellows))
+        self.assertEqual(6, len(self.amity.staff))
 
     @unittest.skip("WIP")
     def test_save_state(self):
@@ -99,9 +122,10 @@ class TestAmity(unittest.TestCase):
     def test_load_state(self):
         pass
 
-    @unittest.skip("WIP")
     def test_print_allocation(self):
-        pass
+        self.amity.print_allocation({"--o": "test_allocation.txt"})
+        self.assertTrue(os.path.exists("test_allocation.txt"))
+        os.remove("test_allocation.txt")
 
     def tearDown(self):
         self.amity = None
