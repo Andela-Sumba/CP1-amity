@@ -1,8 +1,8 @@
 # coding=utf-8
 class Amity(object):
     """
-    Amity class:
-    ________________________________________________________________________________
+        Amity class:
+        ________________________________________________________________________________
         Amity class models a room allocation system for one of
         Andela's facilities called Amity. Amity creates rooms which can
         be offices or living spaces. An office has maximum of 6
@@ -65,5 +65,60 @@ class Amity(object):
         :param id_no: unique identifier for the person to be reallocated
         :param room_name: name of the room person to be relocated to
         :return: Success message that person has be successfully reallocate
+        """
+        pass
+
+    def print_room(self, room_name):
+        """
+        Prints out the members or occupants in the room
+        _______________________________________________________________________________
+        :param room_name: name of room to print
+        :return: prints a list of all occupants in the room
+        """
+        pass
+
+
+    def load_people(self, args):
+        """
+        Load people from a text file to amity
+        ___________________________________________________________________________________________________
+        :param args:
+        :return:
+        """
+        pass
+
+    def save_state(self, args):
+        """
+        save all data in amity to a specified database
+        ___________________________________________________________________________________________________
+        :param args:
+        :return:
+        """
+        pass
+
+    def print_allocation(self, args):
+        """
+        Prints out list of all people who have been allocated a room and save it to an external .txt file
+        ___________________________________________________________________________________________________
+        :param args:
+        :return:
+        """
+        pass
+
+    def print_unallocated(self, args):
+        """
+        Prints out list of all people who have not been allocated a room and save it to an external .txt file
+        ___________________________________________________________________________________________________
+        :param args:
+        :return:
+        """
+        pass
+
+    def load_state(self, args):
+        """
+        Load application state that was saved in the database
+        ___________________________________________________________________________________________________
+        :param args:
+        :return:
         """
         pass
