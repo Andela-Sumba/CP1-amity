@@ -35,4 +35,4 @@ class LivingSpace(Room):
     """
 
     def __init__(self, room_name):
-        super(Office, self).__init__(room_name, "livingspace", 6)
+        super(LivingSpace, self).__init__(room_name, "livingspace", 6)
