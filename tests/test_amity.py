@@ -4,9 +4,6 @@ import unittest
 import sqlite3
 
 from amity.amity import Amity
-from amity.person import Person
-from amity.room import Room
-
 
 class TestAmity(unittest.TestCase):
     """
@@ -15,9 +12,9 @@ class TestAmity(unittest.TestCase):
     def setUp(self):
         self.amity = Amity()
         # creating office space
-        self.amity.create_room("office", ["void"])
+        self.amity.create_room(["void", "office"])
         # creating living space
-        self.amity.create_room("livingspace", ["belta"])
+        self.amity.create_room(["belta", "livingspace"])
         # adding fellows to amity
         self.amity.add_person("Daniel Sumba", "fellow", "y")
         self.amity.add_person("Roronoa Zoro", "fellow", "y")
@@ -32,16 +29,12 @@ class TestAmity(unittest.TestCase):
         self.assertEqual(2, len(self.amity.rooms))
         self.assertEqual(1, len(self.amity.offices))
         self.assertEqual(1, len(self.amity.accommodations))
+        self.assertEqual("void", self.amity.rooms[0])
 
     def test_amity_does_not_create_duplicte_rooms(self):
         """Test that amity does not create duplicate rooms"""
-        response = self.amity.create_room("office", ["void"])
-        self.assertEqual(response, "Amity cannot add duplicate rooms")
-
-    def test_amity_does_not_accept_other_room_types(self):
-        """ Test that amity only accepts room types either office or livingspace"""
-        response = self.amity.create_room("tent", ["Tsavo"])
-        self.assertEqual(response, "Amity only accepts room type of office or livingspace")
+        self.amity.create_room(["void"])
+        self.assertEqual(2, len(self.amity.rooms))
 
     def test_add_person(self):
         """Test that amity can add a person to a the amity system"""
@@ -76,7 +69,7 @@ class TestAmity(unittest.TestCase):
 
     def test_reallocate_person(self):
         """Test that amity can reallocate people to other rooms"""
-        self.amity.create_room("office", ["venus"])
+        self.amity.create_room(["venus", "tent"])
         self.venus = self.amity.offices[1]
         self.person = self.amity.staff[1]
         self.amity.reallocate_person(self.person.id_no, "venus")
@@ -99,13 +92,11 @@ class TestAmity(unittest.TestCase):
         response = self.amity.print_room("jupiter")
         self.assertEqual(response, "The room jupiter is empty!!")
 
-
     def test_print_unallocated(self):
         """The that amity output to a file and that the file exists"""
         self.amity.print_unallocated({"--o": "test_unallocated.txt"})
         self.assertTrue(os.path.exists("test_unallocated.txt"))
         os.remove("test_unallocated.txt")
-
 
     def test_load_people(self):
         """Test that amity can add people from a .txt file"""
