@@ -1,4 +1,12 @@
 # coding=utf-8
+import os
+import random
+import sqlite3 as db
+
+from amity.person import Person,Fellow,Staff
+from amity.room import Room, LivingSpace, Office
+
+
 class Amity(object):
     """
         Amity class:
@@ -35,15 +43,52 @@ class Amity(object):
         self.unallocated = []
         self.allocated = []
 
-    def create_room(self, room_name, room_type):
+    def create_room(self, room_list):
         """
         create rooms in amity that are either of type offices or accommodations
         ________________________________________________________________________
-        :param room_name: the unique name of the room
-        :param room_type: the type of the room (either offices or accommodations)
+        :param room_list: the unique list of room names
         :return: success message
         """
-        pass
+        total_rooms = len(self.rooms)
+        for name in room_list:
+            if name in self.rooms:
+                name_index = self.rooms.index(name)
+                self.rooms.pop(name_index)
+                print("The room " + name + " already exists cannot create duplicate rooms")
+        if "office" in room_list:
+            room_list.pop()
+            for room_name in room_list:
+                Office(room_name)
+                self.rooms.append(room_name)
+                self.offices[room_name] = []
+            new_total_rooms = len(self.rooms)
+            if new_total_rooms-total_rooms > 1:
+                return str(new_total_rooms-total_rooms) + " offices have been successfully created"
+            else:
+                return " The office has been created successfully!"
+
+        elif "livingspace" in room_list:
+            room_list.pop()
+            for room_name in room_list:
+                LivingSpace(room_name)
+                self.rooms.append(room_name)
+                self.accommodations[room_name] = []
+            new_total_rooms = len(self.rooms)
+            if new_total_rooms - total_rooms > 1:
+                return str(new_total_rooms - total_rooms) + " living spaces have been successfully created"
+            else:
+                return "The living space has been created successfully!"
+        else:
+            for room_name in room_list:
+                Office(room_name)
+                self.rooms.append(room_name)
+                self.offices[room_name] = []
+            new_total_rooms = len(self.rooms)
+            if new_total_rooms-total_rooms > 1:
+                return str(new_total_rooms-total_rooms) + " offices have been successfully created"
+            else:
+                return " The office has been created successfully!"
 
     def add_person(self, name, role, accommodate="N"):
         """
@@ -76,7 +121,6 @@ class Amity(object):
         :return: prints a list of all occupants in the room
         """
         pass
-
 
     def load_people(self, args):
         """
