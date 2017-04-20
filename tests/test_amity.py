@@ -4,6 +4,8 @@ import unittest
 import sqlite3
 
 from amity.amity import Amity
+from amity.person import Person
+from amity.room import Room
 
 class TestAmity(unittest.TestCase):
     """
