@@ -105,7 +105,7 @@ class AmityCLI(cmd.Cmd):
         accommodate = accommodate.upper()
         if accommodate != 'Y' and accommodate != 'N':
             print("Please check your arguments."
-                  "\n- <Accomodation> can either be 'Y' or "
+                  "\n- <Accommodate> can either be 'Y' or "
                   "'N' only.\n- Type 'help add_person' for "
                   "more information", 'red')
             return
@@ -220,8 +220,8 @@ class AmityCLI(cmd.Cmd):
 
     def do_quit(self, args):
         """ Quits the interactive mode """
-        print "Goodbye!"
-        print "Closing Amity..."
+        print ("Goodbye!")
+        print ("Closing Amity...")
         exit()
 
 opt = docopt(__doc__, sys.argv[1:])
