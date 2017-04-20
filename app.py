@@ -120,12 +120,16 @@ class AmityCLI(cmd.Cmd):
         by specifying multiple room
         names after the create_room command.
         -----------------------------------------------------
-        Usage: create_room <room_type> <room_name>...
+        Usage: create_room <room_name>... [--ls | --o]
         """
-        room_type = args["<room_type>"]
+        room_args = []
         for room_name in args["<room_name>"]:
-            print(amity.create_room(room_name, room_type))
-
+            room_args.append(room_name.capitalize())
+        if args['--ls'] is True:
+            room_args.append("livingspace")
+        elif args['--o'] is True:
+            room_args.append("office")
+        print(amity.create_room(room_args))
 
     @docopt_cmd
     def do_rellocate_person(self, args):
