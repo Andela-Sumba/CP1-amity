@@ -1,8 +1,38 @@
 class Room(object):
-    pass
+    """
+        Class: Room
+        -----------
+        The room class is a super class that handles the creation of Rooms
+        in the amity application. Relies on the information it gets from
+        the child classes LivingSpace and Office
+    """
+
+    def __init__(self, room_name, room_type, capacity):
+        self.room_name = room_name
+        self.room_type = room_type
+        self.capacity = capacity
+        self.occupants = []
+
 
 class Office(Room):
-    pass
+    """
+        Class: Office
+        _____________
+        class Office is child class that inherits from the Person class.
+        it contains the specific attributes related to a room of type office
+    """
+
+    def __init__(self, room_name):
+        super(Office, self).__init__(room_name, "office", 6)
+
 
 class LivingSpace(Room):
-    pass
+    """
+        Class: LivingSpace
+        __________________
+        class LivingSpace is child class that inherits from the Person class.
+        it contains the specific attributes related to a room of type LivingSpace
+    """
+
+    def __init__(self, room_name):
+        super(Office, self).__init__(room_name, "livingspace", 6)
