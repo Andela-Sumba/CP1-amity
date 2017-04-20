@@ -2,9 +2,10 @@
 import os
 import random
 import sqlite3 as db
-
-from amity.person import Person,Fellow,Staff
-from amity.room import Room, LivingSpace, Office
+import sys
+from termcolor import colored
+from person import Person,Fellow,Staff
+from room import Room, LivingSpace, Office
 
 
 class Amity(object):
@@ -90,7 +91,7 @@ class Amity(object):
             else:
                 return " The office has been created successfully!"
 
-    def add_person(self, name, role, accommodate="N"):
+    def add_person(self, role, name, accommodate="N"):
         """
         adds people to amity that are either fellows or staff and the person has
         a choice to either want accommodation or not
@@ -101,7 +102,90 @@ class Amity(object):
         :return: success messages that person added successfully, added to office
                  successfully, and added to living space successfully
         """
-        pass
+        self.allocated = False
+        if role.upper() == "FELLOW":
+            new_employee = Fellow(name)
+            new_id_no = str(id(new_employee))
+            self.employees[new_id_no] = name
+            self.fellows[new_id_no] = name
+            self.allocate_office(new_id_no)
+
+            if accommodate == "Y":
+                self.allocate_accommodation(new_id_no)
+
+            if not self.allocated:
+                self.unallocated.append(new_id_no)
+
+            if new_id_no in self.employees.keys() and self.fellows.keys():
+                return "The fellow " + name + " has been added successfully to the system"
+            else:
+                return "error!!! person not add properly"
+
+        elif role.upper() == "STAFF":
+            new_employee = Staff(name)
+            new_id_no = str(id(new_employee))
+            self.employees[new_id_no] = name
+            self.staff[new_id_no] = name
+            self.allocate_office(new_id_no)
+
+            if accommodate == "Y":  # check that amity does not allocate staff accommodation
+                print("staff can not be allocated accommodation")
+
+            if not self.allocated:
+                self.unallocated.append(new_id_no)
+
+            if new_id_no in self.employees.keys() and self.staff.keys():
+                return "The staff " + name + " has been added successfully to the system"
+            else:
+                return "error!!! person not add properly"
+
+        else:
+            return "Please specify the persons role"
+
+    def allocate_office(self, new_id_no):
+        """
+
+        :param new_id_no:
+        :return:
+        """
+        if len(self.rooms) == 0:
+            msg = "The system has no available rooms"
+            return msg
+
+        vacant_offices = []
+        for room in self.rooms:
+            if room in self.offices.keys() and len(self.offices[room]) < 6:
+                vacant_offices.append(room)
+        if len(vacant_offices) == 0:
+            print("The system has no available office space")
+        else:
+            workspace = random.choice(vacant_offices)
+            self.offices[workspace].append(new_id_no)
+            self.allocated = True
+            if new_id_no in self.offices[workspace]:
+                print("office allocated successfully")
+
+    def allocate_accommodation(self, new_id_no):
+        """
+        :param new_id_no:
+        :return:
+        """
+        if len(self.rooms) == 0:
+            msg = "The system has no available rooms"
+            return msg
+
+        vacant_accommodation = []
+        for room in self.rooms:
+            if room in self.accommodations.keys() and len(self.accommodations[room]) < 4:
+                vacant_accommodation.append(room)
+        if len(vacant_accommodation) == 0:
+            print("The system has no available accommodations")
+        else:
+            workspace = random.choice(vacant_accommodation)
+            self.accommodations[workspace].append(new_id_no)
+            self.allocated = True
+            if new_id_no in self.accommodations[workspace]:
+                print("allocated accommodation successfully")
 
     def reallocate_person(self, id_no, room_name):
         """
@@ -120,7 +204,17 @@ class Amity(object):
         :param room_name: name of room to print
         :return: prints a list of all occupants in the room
         """
-        pass
+        if room_name not in self.rooms:
+            return "There is no search room in system!"
+        else:
+            print("The members of room " + room_name + ":")
+            if room_name in self.rooms:
+                if room_name in list(self.offices.keys()):
+                    for item in self.offices[room_name]:
+                        print(self.employees[item])
+                elif room_name in self.accommodations.keys():
+                    for item in self.accommodations[room_name]:
+                        print(self.employees[item])
 
     def load_people(self, args):
         """
@@ -129,7 +223,21 @@ class Amity(object):
         :param args:
         :return:
         """
-        pass
+        txtfile = arg["<filename>"]
+        with open('data/inputs/' + txtfile, 'r') as loadfile:
+            people = loadfile.readlines()
+            for msee in people:
+                msee = msee.split()
+                role = msee[0]
+                name = msee[1]
+                name += " " + msee[2]
+                if len(msee) == 4:
+                    accommodate = msee[3]
+                else:
+                    accommodate = "N"
+                self.add_person(role, name, accommodate)
+
+
 
     def save_state(self, args):
         """
@@ -156,7 +264,19 @@ class Amity(object):
         :param args:
         :return:
         """
-        pass
+        if len(self.unallocated) == 0:
+            return "There are no unallocated people"
+        else:
+            output = "UNALLOCATED PEOPLE"
+            output += "________________________________"
+            for item in self.unallocated:
+                output += item
+            print(output)
+            if arg["--o"]:
+                with open(args["--o"], 'wt') as file:
+                    file.write(output)
+                    print("Unallocated saved to: {}".format(args["--o"])
+
 
     def load_state(self, args):
         """
