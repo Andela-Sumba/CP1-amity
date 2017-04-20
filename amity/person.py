@@ -24,7 +24,7 @@ class Fellow(Person):
     """
 
     def __init__(self, name):
-        super(Fellow, self).__init__(name, "Fellow")
+        super(Fellow, self).__init__(name, "fellow")
 
 
 class Staff(Person):
@@ -37,4 +37,4 @@ class Staff(Person):
         other responsibilities related to a Staff.
     """
     def __init__(self, name):
-        super(Staff, self).__init__(name, "Staff")
+        super(Staff, self).__init__(name, "staff")
