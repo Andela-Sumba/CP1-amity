@@ -11,7 +11,6 @@ class Room(object):
         self.room_name = room_name
         self.room_type = room_type
         self.capacity = capacity
-        self.occupants = []
 
 
 class Office(Room):
