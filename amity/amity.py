@@ -1,10 +1,10 @@
 # coding=utf-8
 import os
 import random
-import sqlite3 as db
+import sqlite3
 import sys
-from termcolor import colored
-from person import Person,Fellow,Staff
+
+from person import Person, Fellow, Staff
 from room import Room, LivingSpace, Office
 
 
@@ -57,39 +57,40 @@ class Amity(object):
                 name_index = self.rooms.index(name)
                 self.rooms.pop(name_index)
                 print("The room " + name + " already exists cannot create duplicate rooms")
-        if "office" in room_list:
-            room_list.pop()
-            for room_name in room_list:
-                Office(room_name)
-                self.rooms.append(room_name)
-                self.offices[room_name] = []
-            new_total_rooms = len(self.rooms)
-            if new_total_rooms-total_rooms > 1:
-                return str(new_total_rooms-total_rooms) + " offices have been successfully created"
-            else:
-                return " The office has been created successfully!"
+        if len(room_list) != 0:
+            if "office" in room_list:
+                room_list.pop()
+                for room_name in room_list:
+                    Office(room_name)
+                    self.rooms.append(room_name)
+                    self.offices[room_name] = []
+                new_total_rooms = len(self.rooms)
+                if new_total_rooms-total_rooms > 1:
+                    return str(new_total_rooms-total_rooms) + " offices have been successfully created"
+                else:
+                    return " The office has been created successfully!"
 
-        elif "livingspace" in room_list:
-            room_list.pop()
-            for room_name in room_list:
-                LivingSpace(room_name)
-                self.rooms.append(room_name)
-                self.accommodations[room_name] = []
-            new_total_rooms = len(self.rooms)
-            if new_total_rooms - total_rooms > 1:
-                return str(new_total_rooms - total_rooms) + " living spaces have been successfully created"
+            elif "livingspace" in room_list:
+                room_list.pop()
+                for room_name in room_list:
+                    LivingSpace(room_name)
+                    self.rooms.append(room_name)
+                    self.accommodations[room_name] = []
+                new_total_rooms = len(self.rooms)
+                if new_total_rooms - total_rooms > 1:
+                    return str(new_total_rooms - total_rooms) + " living spaces have been successfully created"
+                else:
+                    return "The living space has been created successfully!"
             else:
-                return "The living space has been created successfully!"
-        else:
-            for room_name in room_list:
-                Office(room_name)
-                self.rooms.append(room_name)
-                self.offices[room_name] = []
-            new_total_rooms = len(self.rooms)
-            if new_total_rooms-total_rooms > 1:
-                return str(new_total_rooms-total_rooms) + " offices have been successfully created"
-            else:
-                return " The office has been created successfully!"
+                for room_name in room_list:
+                    Office(room_name)
+                    self.rooms.append(room_name)
+                    self.offices[room_name] = []
+                new_total_rooms = len(self.rooms)
+                if new_total_rooms-total_rooms > 1:
+                    return str(new_total_rooms-total_rooms) + " offices have been successfully created"
+                else:
+                    return " The office has been created successfully!"
 
     def add_person(self, role, name, accommodate="N"):
         """
@@ -144,9 +145,10 @@ class Amity(object):
 
     def allocate_office(self, new_id_no):
         """
-
-        :param new_id_no:
-        :return:
+        Allocates office to staff and fellows
+        _______________________________________________________
+        :param new_id_no: id number of the person
+        :return: success or failure message
         """
         if len(self.rooms) == 0:
             msg = "The system has no available rooms"
@@ -163,12 +165,14 @@ class Amity(object):
             self.offices[workspace].append(new_id_no)
             self.allocated = True
             if new_id_no in self.offices[workspace]:
-                print("office allocated successfully")
+                print("successfully allocated the office: " + workspace)
 
     def allocate_accommodation(self, new_id_no):
         """
-        :param new_id_no:
-        :return:
+        Allocates random living space to fellows only
+        ______________________________________________________________________________
+        :param new_id_no: id number of fellow being allocated:
+        :return: success or failure message
         """
         if len(self.rooms) == 0:
             msg = "The system has no available rooms"
@@ -185,7 +189,21 @@ class Amity(object):
             self.accommodations[workspace].append(new_id_no)
             self.allocated = True
             if new_id_no in self.accommodations[workspace]:
-                print("allocated accommodation successfully")
+                print("successfully allocated the living space: " + workspace)
+
+    def get_person_id(self, search_name):
+        """
+        The function receive a search name and prints out the id number of person
+        ___________________________________________________________
+        :param search_name: Name of person you want to get the id
+        :return: prints out id_no of the person being searched
+        """
+        if search_name not in list(self.employees.values()):
+            print("The person is not in system")
+        else:
+            for id_no, name in self.employees.items():
+                if name == search_name:
+                    print(id_no)
 
     def reallocate_person(self, id_no, room_name):
         """
@@ -195,7 +213,30 @@ class Amity(object):
         :param room_name: name of the room person to be relocated to
         :return: Success message that person has be successfully reallocate
         """
-        pass
+        vacant_room = []
+        if room_name not in self.rooms:
+            return "The room " + room_name + " does not exist in amity"
+        if room_name in self.accommodations.keys() and len(self.accommodations[room_name]) < 4:
+            vacant_room.append(room_name)
+        elif room_name in self.offices.keys() and len(self.offices[room_name]) < 6:
+            vacant_room.append(room_name)
+        for room in vacant_room:
+            if id_no in self.staff.keys():
+                if room in self.accommodations.keys():
+                    return "Staff can not be allocated a living space"
+                else:
+                    self.offices[room].append[id_no]
+                    if id_no in self.offices[room]:
+                        print("The person has been successfully moved to: " + room)
+            if id_no in self.fellows.keys():
+                if room in self.accommodations.keys():
+                    self.accommodations[room].append[id_no]
+                    if id_no in self.accommodations[room]:
+                        print("The person has been successfully moved to: " + room)
+                else:
+                    self.offices[room].append[id_no]
+                    if id_no in self.offices[room]:
+                        print("The person has been successfully moved to: " + room)
 
     def print_room(self, room_name):
         """
@@ -216,37 +257,73 @@ class Amity(object):
                     for item in self.accommodations[room_name]:
                         print(self.employees[item])
 
-    def load_people(self, args):
+    def load_people(self, textfile):
         """
         Load people from a text file to amity
-        ___________________________________________________________________________________________________
-        :param args:
+        ____________________________________________________________________________________
+        :param textfile:
         :return:
         """
-        txtfile = arg["<filename>"]
-        with open('data/inputs/' + txtfile, 'r') as loadfile:
-            people = loadfile.readlines()
-            for msee in people:
-                msee = msee.split()
-                role = msee[0]
-                name = msee[1]
-                name += " " + msee[2]
-                if len(msee) == 4:
-                    accommodate = msee[3]
-                else:
-                    accommodate = "N"
-                self.add_person(role, name, accommodate)
-
-
+        if not isinstance(textfile, str):
+            return TypeError("Amity on accepts string as input")
+        elif textfile is not None:
+            if os.path.exists('data/input/' + textfile):
+                f = open('data/input' + textfile, 'r')
+                people = f.readlines()
+                for msee in people:
+                    msee = msee.split(" ")
+                    role = msee[0]
+                    name = msee[1]
+                    name += " " + msee[2]
+                    if len(msee) == 4:
+                        accommodate = msee[3].upper()
+                    else:
+                        accommodate = "N"
+                        self.add_person(role, name, accommodate)
+            else:
+                return "The file does not exist!"
+        return "People have been successfully load to amity!"
 
     def save_state(self, args):
         """
         save all data in amity to a specified database
-        ___________________________________________________________________________________________________
+        _____________________________________________________________________________________
         :param args:
         :return:
         """
-        pass
+        if args["--db"]:
+            database_name = args["--db"]
+        else:
+            database_name = "kuokoa.db"
+        self.conn = sqlite3.connect(database_name)
+        self.cur = self.conn.cursor()
+        self.cur.execute("DROP TABLE IF EXISTS Employees")
+        self.cur.execute("DROP TABLE IF EXISTS Rooms")
+        self.cur.execute("DROP TABLE IF EXISTS State")
+        self.create_table(database_name)
+
+        self.conn.commit()
+
+    def create_table(self, database_name):
+        """
+        Creates table in the database
+        _______________________
+        :param database_name:
+        :return:
+        """
+        self.conn = sqlite3.connect(database_name)
+        self.cur = self.conn.cursor()
+
+        try:
+            self.cur.execute('''CREATE TABLE IF NOT EXISTS Employees(
+                                id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Role TEXT, id_no TEXT)''')
+
+            self.cur.execute('''CREATE TABLE IF NOT EXISTS Rooms(
+                                        id INTEGER PRIMARY KEY AUTOINCREMENT, Room_Name TEXT, Room_Type TEXT)''')
+
+            self.cur.execute('''CREATE TABLE IF NOT EXISTS State(State BLOB)''')
+        except sqlite3.IntegrityError:
+            return False
 
     def print_allocation(self, args):
         """
@@ -255,7 +332,25 @@ class Amity(object):
         :param args:
         :return:
         """
-        pass
+        occupied_rooms = []
+        if len(occupied_rooms) == 0:
+            return "There are no occupied rooms in amity!"
+        for room in self.rooms:
+            if room in self.accommodations.keys() and len(self.accommodations[room]) != 0:
+                occupied_rooms.append(room)
+            elif room in self.offices.keys() and len(self.offices[room]) != 0:
+                occupied_rooms.append(room)
+        for rname in occupied_rooms:
+            if rname in self.accommodations.keys():
+                print(rname.upper())
+                print("__________________________________________________________\n")
+                for person_id in self.accommodations[rname]:
+                    print("{} {}".format(self.employees[person_id], self.accommodations[rname]))
+            elif rname in self.offices.keys():
+                print(rname.upper())
+                print("__________________________________________________________\n")
+                for person_id in self.offices[rname]:
+                    print("{} {}".format(self.employees[person_id], self.accommodations[rname]))
 
     def print_unallocated(self, args):
         """
@@ -272,11 +367,10 @@ class Amity(object):
             for item in self.unallocated:
                 output += item
             print(output)
-            if arg["--o"]:
+            if args["--o"]:
                 with open(args["--o"], 'wt') as file:
                     file.write(output)
-                    print("Unallocated saved to: {}".format(args["--o"])
-
+                    print("Unallocated saved to: {}".format(args["--o"]))
 
     def load_state(self, args):
         """
