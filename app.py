@@ -146,11 +146,12 @@ class AmityCLI(cmd.Cmd):
     @docopt_cmd
     def do_load_people(self, args):
         """
-        Adds people to rooms from a txt file
+        Adds people to rooms from a text file
         -----------------------------------------------------
-        usage: load_people
+        usage: load_people <filename>
         """
-        amity.load_people(args['<filename>'])
+
+        print(amity.load_people(args['<filename>']))
 
     @docopt_cmd
     def do_print_allocations(self, args):
@@ -159,9 +160,9 @@ class AmityCLI(cmd.Cmd):
         Specifying the optional -o option here outputs
         the registered allocations to a txt file.
         -----------------------------------------------------
-        usage: print_allocations [-o=filename]
+        usage: print_allocations [--o=filename]
         """
-        amity.print_allocations(args['--o'])
+        print(amity.print_allocations(args['--o']))
 
     @docopt_cmd
     def do_print_unallocated(self, args):
@@ -170,9 +171,9 @@ class AmityCLI(cmd.Cmd):
         Specifying the optional -o option here outputs
         the registered allocations to a txt file
         -----------------------------------------------------
-        usage: print_unallocated [-o=filename]
+        usage: print_unallocated [--o=filename]
         """
-        amity.print_unallocated(args['--o'])
+        print(amity.print_unallocated(args['--o']))
 
     @docopt_cmd
     def do_print_room(self, arg):
@@ -189,11 +190,11 @@ class AmityCLI(cmd.Cmd):
         """
         Persists all the data stored in the app to a
         SQLite database. Specifying the --db parameter explicitly stores the data in the
-        sqlite_database specified.
+        SQlite database specified.
         -----------------------------------------------------
         usage: save_state [--db=sqlite_database]
         """
-        amity.save_state(args['--db'])
+        print(amity.save_state(args['--db']))
 
     @docopt_cmd
     def do_load_state(self, args):
@@ -202,12 +203,12 @@ class AmityCLI(cmd.Cmd):
         -----------------------------------------------------
         usage: load_state <sqlite_database>
         """
-        amity.load_state(args)
+        print(amity.load_state(args))
 
     @docopt_cmd
     def do_list_available_rooms(self, args):
         """ Usage: list_available_rooms """
-        amity.list_available_rooms()
+        print(amity.list_available_rooms())
 
     @docopt_cmd
     def do_get_id(self, args):
@@ -216,12 +217,14 @@ class AmityCLI(cmd.Cmd):
        _________________________________________________________
         Usage: get_id <firstname> <secondname>
         """
-        pass
+        search_name = args['<firstname>'].capitalize()
+        search_name += " " + args['<surname>'].capitalize()
+        print(amity.get_person_id(search_name))
 
     def do_quit(self, args):
         """ Quits the interactive mode """
-        print ("Goodbye!")
-        print ("Closing Amity...")
+        print("Goodbye!")
+        print("Closing Amity...")
         exit()
 
 opt = docopt(__doc__, sys.argv[1:])
