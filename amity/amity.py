@@ -7,6 +7,9 @@ import sys
 from person import Person, Fellow, Staff
 from room import Room, LivingSpace, Office
 
+if os.path.exists('amity'):
+    os.chdir('amity')
+
 
 class Amity(object):
     """
@@ -105,8 +108,8 @@ class Amity(object):
         """
         self.allocated = False
         if role.upper() == "FELLOW":
-            new_employee = Fellow(name)
-            new_id_no = str(id(new_employee))
+            Fellow(name)
+            new_id_no = str(id(name))
             self.employees[new_id_no] = name
             self.fellows[new_id_no] = name
             self.allocate_office(new_id_no)
@@ -123,8 +126,8 @@ class Amity(object):
                 return "error!!! person not add properly"
 
         elif role.upper() == "STAFF":
-            new_employee = Staff(name)
-            new_id_no = str(id(new_employee))
+            Staff(name)
+            new_id_no = str(id(name))
             self.employees[new_id_no] = name
             self.staff[new_id_no] = name
             self.allocate_office(new_id_no)
@@ -214,29 +217,30 @@ class Amity(object):
         :return: Success message that person has be successfully reallocate
         """
         vacant_room = []
-        if room_name not in self.rooms:
-            return "The room " + room_name + " does not exist in amity"
-        if room_name in self.accommodations.keys() and len(self.accommodations[room_name]) < 4:
-            vacant_room.append(room_name)
-        elif room_name in self.offices.keys() and len(self.offices[room_name]) < 6:
-            vacant_room.append(room_name)
+        new_room = room_name.capitalize()
+        if new_room not in self.rooms:
+            return "The room " + new_room + " does not exist in amity"
+        if new_room in self.accommodations.keys() and len(self.accommodations[new_room]) < 4:
+            vacant_room.append(new_room)
+        elif new_room in self.offices.keys() and len(self.offices[new_room]) < 6:
+            vacant_room.append(new_room)
         for room in vacant_room:
             if id_no in self.staff.keys():
                 if room in self.accommodations.keys():
                     return "Staff can not be allocated a living space"
                 else:
-                    self.offices[room].append[id_no]
+                    self.offices[room].append(id_no)
                     if id_no in self.offices[room]:
                         print("The person has been successfully moved to: " + room)
             if id_no in self.fellows.keys():
                 if room in self.accommodations.keys():
-                    self.accommodations[room].append[id_no]
+                    self.accommodations[room].append(id_no)
                     if id_no in self.accommodations[room]:
-                        print("The person has been successfully moved to: " + room)
+                        print(self.employees[id_no] + " has been successfully moved to: " + room)
                 else:
-                    self.offices[room].append[id_no]
+                    self.offices[room].append(id_no)
                     if id_no in self.offices[room]:
-                        print("The person has been successfully moved to: " + room)
+                        print(self.employees[id_no] + " has been successfully moved to: " + room)
 
     def print_room(self, room_name):
         """
@@ -245,17 +249,18 @@ class Amity(object):
         :param room_name: name of room to print
         :return: prints a list of all occupants in the room
         """
-        if room_name not in self.rooms:
-            return "There is no search room in system!"
+        print_name = room_name.capitalize()
+        if print_name not in self.rooms:
+            return "There is no room " + print_name + " in system!"
         else:
-            print("The members of room " + room_name + ":")
-            if room_name in self.rooms:
-                if room_name in list(self.offices.keys()):
-                    for item in self.offices[room_name]:
-                        print(self.employees[item])
-                elif room_name in self.accommodations.keys():
-                    for item in self.accommodations[room_name]:
-                        print(self.employees[item])
+            print("The members of room " + print_name + ":")
+            if print_name in self.rooms:
+                if print_name in list(self.offices.keys()):
+                    for item in self.offices[print_name]:
+                        print(self.employees[item].upper())
+                elif print_name in self.accommodations.keys():
+                    for item in self.accommodations[print_name]:
+                        print(self.employees[item].upper())
 
     def load_people(self, textfile):
         """
@@ -268,23 +273,73 @@ class Amity(object):
             return TypeError("Amity on accepts string as input")
         elif textfile is not None:
             if os.path.exists('data/input/' + textfile):
-                f = open('data/input' + textfile, 'r')
-                people = f.readlines()
-                for msee in people:
-                    msee = msee.split(" ")
-                    role = msee[0]
-                    name = msee[1]
-                    name += " " + msee[2]
-                    if len(msee) == 4:
-                        accommodate = msee[3].upper()
-                    else:
-                        accommodate = "N"
+                with open('data/input/' + textfile, 'r') as file:
+                    people = file.readlines()
+                    for person in people:
+                        p_details = person.split()
+                        role = p_details[0]
+                        name = p_details[1] + " " + p_details[2]
+                        if len(p_details) > 3:
+                            accommodate = p_details[3]
+                        else:
+                            accommodate = "N"
                         self.add_person(role, name, accommodate)
             else:
                 return "The file does not exist!"
         return "People have been successfully load to amity!"
 
-    def save_state(self, args):
+    def print_allocations(self, filename=None):
+        """
+        Prints out list of all people who have been allocated a room and save it to an external .txt file
+        ___________________________________________________________________________________________________
+        :param filename:
+        :return:
+        """
+        occupied_rooms = []
+        output = "ROOM ALLOCATIONS\n"
+        if len(occupied_rooms) == 0:
+            return "There are no occupied rooms in amity!"
+        for room in self.rooms:
+            if room in self.accommodations.keys() and len(self.accommodations[room]) != 0:
+                occupied_rooms.append(room)
+            elif room in self.offices.keys() and len(self.offices[room]) != 0:
+                occupied_rooms.append(room)
+        for room_name in occupied_rooms:
+            if room_name in self.accommodations.keys():
+                output += room_name.upper() + "\n"
+                output += "-----------------------------------------------\n"
+                output += ", ".join(self.accommodations[room_name]) + "\n"
+            elif room_name in self.offices.keys():
+                output += room_name.upper() + "\n"
+                output += "-----------------------------------------------\n"
+                output += ", ".join(self.offices[room_name]) + "\n"
+        print(output)
+        if filename is not None:
+            with open('data/output/' + filename, 'w') as outfile:
+                outfile.write(output)
+                print("Allocations saved to: {}".format(filename))
+
+    def print_unallocated(self, filename):
+        """
+        Prints out list of all people who have not been allocated a room and save it to an external .txt file
+        ___________________________________________________________________________________________________
+        :param filename:
+        :return:
+        """
+        if len(self.unallocated) == 0:
+            return "There are no unallocated people"
+        else:
+            output = "UNALLOCATED PEOPLE"
+            output += "________________________________"
+            for item in self.unallocated:
+                output += item
+            print(output)
+            if filename is not None:
+                with open('data/output/' + filename, 'w') as outfile:
+                    outfile.write(output)
+                    print("Allocations saved to: {}".format(filename))
+
+    def save_state(self, args):  # work in progress
         """
         save all data in amity to a specified database
         _____________________________________________________________________________________
@@ -324,53 +379,6 @@ class Amity(object):
             self.cur.execute('''CREATE TABLE IF NOT EXISTS State(State BLOB)''')
         except sqlite3.IntegrityError:
             return False
-
-    def print_allocation(self, args):
-        """
-        Prints out list of all people who have been allocated a room and save it to an external .txt file
-        ___________________________________________________________________________________________________
-        :param args:
-        :return:
-        """
-        occupied_rooms = []
-        if len(occupied_rooms) == 0:
-            return "There are no occupied rooms in amity!"
-        for room in self.rooms:
-            if room in self.accommodations.keys() and len(self.accommodations[room]) != 0:
-                occupied_rooms.append(room)
-            elif room in self.offices.keys() and len(self.offices[room]) != 0:
-                occupied_rooms.append(room)
-        for rname in occupied_rooms:
-            if rname in self.accommodations.keys():
-                print(rname.upper())
-                print("__________________________________________________________\n")
-                for person_id in self.accommodations[rname]:
-                    print("{} {}".format(self.employees[person_id], self.accommodations[rname]))
-            elif rname in self.offices.keys():
-                print(rname.upper())
-                print("__________________________________________________________\n")
-                for person_id in self.offices[rname]:
-                    print("{} {}".format(self.employees[person_id], self.accommodations[rname]))
-
-    def print_unallocated(self, args):
-        """
-        Prints out list of all people who have not been allocated a room and save it to an external .txt file
-        ___________________________________________________________________________________________________
-        :param args:
-        :return:
-        """
-        if len(self.unallocated) == 0:
-            return "There are no unallocated people"
-        else:
-            output = "UNALLOCATED PEOPLE"
-            output += "________________________________"
-            for item in self.unallocated:
-                output += item
-            print(output)
-            if args["--o"]:
-                with open(args["--o"], 'wt') as file:
-                    file.write(output)
-                    print("Unallocated saved to: {}".format(args["--o"]))
 
     def load_state(self, args):
         """
