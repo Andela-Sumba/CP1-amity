@@ -75,9 +75,11 @@ def app_header():
     cprint('--------------------------------------------------------------------------', 'magenta')
     cprint("\n\tType 'help' to see a full list of commands\n", 'white')
 
+
 def custom_print(arg, color='green'):
     """ This is a simple print function that adds color to printed output. """
     cprint("\n" + arg + "\n", color)
+
 
 class AmityCLI(cmd.Cmd):
     """
@@ -132,15 +134,15 @@ class AmityCLI(cmd.Cmd):
         print(amity.create_room(room_args))
 
     @docopt_cmd
-    def do_rellocate_person(self, args):
+    def do_reallocate_person(self, args):
         """
         Reallocate the
         person with the id_no to new_room_name .
         -----------------------------------------------------
-        Usage: reallocate_person <id_no> <new_room_name>
+        Usage: reallocate_person <id_no> <room_name>
         """
-        id_no = args['<id_no>']
-        room_name = args['new_room_name']
+        id_no = args["<id_no>"]
+        room_name = args["<room_name>"]
         print(amity.reallocate_person(id_no, room_name))
 
     @docopt_cmd
@@ -215,7 +217,7 @@ class AmityCLI(cmd.Cmd):
         """
         gets the id number that belongs to the person add prints it
        _________________________________________________________
-        Usage: get_id <firstname> <secondname>
+        Usage: get_id <firstname> <surname>
         """
         search_name = args['<firstname>'].capitalize()
         search_name += " " + args['<surname>'].capitalize()
