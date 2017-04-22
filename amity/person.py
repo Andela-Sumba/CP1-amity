@@ -10,7 +10,6 @@ class Person(object):
         self.name = name
         self.role = role
         self.id_no = str(id(self))
-    pass
 
 
 class Fellow(Person):
