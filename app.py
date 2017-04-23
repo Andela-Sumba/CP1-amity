@@ -196,6 +196,8 @@ class AmityCLI(cmd.Cmd):
         -----------------------------------------------------
         usage: save_state [--db=sqlite_database]
         """
+        if not args['--db']:
+            args['--db'] = 'amity.db'
         print(amity.save_state(args['--db']))
 
     @docopt_cmd
@@ -203,9 +205,11 @@ class AmityCLI(cmd.Cmd):
         """
         Loads data from a database into the application.
         -----------------------------------------------------
-        usage: load_state <sqlite_database>
+        usage: load_state [--db=sqlite_database]
         """
-        print(amity.load_state(args))
+        if not args['--db']:
+            args['--db'] = 'amity.db'
+        print(amity.load_state(args['--db']))
 
     @docopt_cmd
     def do_list_available_rooms(self, args):
