@@ -2,6 +2,7 @@
 import os
 import random
 import sqlite3
+import pickle
 import sys
 
 from person import Person, Fellow, Staff
@@ -121,9 +122,9 @@ class Amity(object):
                 self.unallocated.append(new_id_no)
 
             if new_id_no in self.employees.keys() and self.fellows.keys():
-                return "The fellow " + name + " has been added successfully to the system"
+                return "The fellow " + name + " has been added successfully to the system\n"
             else:
-                return "error!!! person not add properly"
+                return "error!!! person not add properly\n"
 
         elif role.upper() == "STAFF":
             Staff(name)
@@ -133,18 +134,18 @@ class Amity(object):
             self.allocate_office(new_id_no)
 
             if accommodate == "Y":  # check that amity does not allocate staff accommodation
-                print("staff can not be allocated accommodation")
+                print("staff can not be allocated accommodation\n")
 
             if not self.allocated:
                 self.unallocated.append(new_id_no)
 
             if new_id_no in self.employees.keys() and self.staff.keys():
-                return "The staff " + name + " has been added successfully to the system"
+                return "The staff " + name + " has been added successfully to the system\n"
             else:
-                return "error!!! person not add properly"
+                return "error!!! person not add properly\n"
 
         else:
-            return "Please specify the persons role"
+            return "Please specify the persons role\n"
 
     def allocate_office(self, new_id_no):
         """
@@ -168,7 +169,7 @@ class Amity(object):
             self.offices[workspace].append(new_id_no)
             self.allocated = True
             if new_id_no in self.offices[workspace]:
-                print("successfully allocated the office: " + workspace)
+                print(self.employees[new_id_no] + " has successfully been allocated the office: " + workspace)
 
     def allocate_accommodation(self, new_id_no):
         """
@@ -187,12 +188,13 @@ class Amity(object):
                 vacant_accommodation.append(room)
         if len(vacant_accommodation) == 0:
             print("The system has no available accommodations")
+            self.unallocated.append(new_id_no)
         else:
             workspace = random.choice(vacant_accommodation)
             self.accommodations[workspace].append(new_id_no)
             self.allocated = True
             if new_id_no in self.accommodations[workspace]:
-                print("successfully allocated the living space: " + workspace)
+                print(self.employees[new_id_no] + " has successfully been allocated the living space: " + workspace)
 
     def get_person_id(self, search_name):
         """
@@ -229,15 +231,27 @@ class Amity(object):
                 if room in self.accommodations.keys():
                     return "Staff can not be allocated a living space"
                 else:
+                    for saved_room, saved_id_no in self.offices.items():
+                        for item in self.offices[saved_room]:
+                            if item == id_no:
+                                self.offices[saved_room].remove(item)
                     self.offices[room].append(id_no)
                     if id_no in self.offices[room]:
-                        print("The person has been successfully moved to: " + room)
+                        print(self.employees[id_no] + " has been successfully moved to: " + room)
             if id_no in self.fellows.keys():
                 if room in self.accommodations.keys():
+                    for saved_room, saved_id_no in self.accommodations.items():
+                        for item in self.accommodations[saved_room]:
+                            if item == id_no:
+                                self.accommodations[saved_room].remove(item)
                     self.accommodations[room].append(id_no)
                     if id_no in self.accommodations[room]:
                         print(self.employees[id_no] + " has been successfully moved to: " + room)
                 else:
+                    for saved_room, saved_id_no in self.offices.items():
+                        for item in self.offices[saved_room]:
+                            if item == id_no:
+                                self.offices[saved_room].remove(item)
                     self.offices[room].append(id_no)
                     if id_no in self.offices[room]:
                         print(self.employees[id_no] + " has been successfully moved to: " + room)
@@ -252,8 +266,14 @@ class Amity(object):
         print_name = room_name.capitalize()
         if print_name not in self.rooms:
             return "There is no room " + print_name + " in system!"
+        if print_name in list(self.offices.keys()) and len(self.offices[print_name]) == 0:
+            return print_name + " is empty!"
+        elif print_name in list(self.accommodations.keys()) and len(self.accommodations[print_name]) == 0:
+            return print_name + " is empty!"
         else:
-            print("The members of room " + print_name + ":")
+            header = "The members of room " + print_name + ":\n"
+            header += "------------------------------------------\n"
+            print(header)
             if print_name in self.rooms:
                 if print_name in list(self.offices.keys()):
                     for item in self.offices[print_name]:
@@ -286,7 +306,7 @@ class Amity(object):
                         self.add_person(role, name, accommodate)
             else:
                 return "The file does not exist!"
-        return "People have been successfully load to amity!"
+        return "People have been successfully loaded to amity!"
 
     def print_allocations(self, filename=None):
         """
@@ -297,29 +317,33 @@ class Amity(object):
         """
         occupied_rooms = []
         output = "ROOM ALLOCATIONS\n"
-        if len(occupied_rooms) == 0:
-            return "There are no occupied rooms in amity!"
         for room in self.rooms:
             if room in self.accommodations.keys() and len(self.accommodations[room]) != 0:
                 occupied_rooms.append(room)
             elif room in self.offices.keys() and len(self.offices[room]) != 0:
                 occupied_rooms.append(room)
+        if len(occupied_rooms) == 0:
+            return "There are no occupied rooms in amity!"
         for room_name in occupied_rooms:
             if room_name in self.accommodations.keys():
+                output += "\n"
                 output += room_name.upper() + "\n"
                 output += "-----------------------------------------------\n"
-                output += ", ".join(self.accommodations[room_name]) + "\n"
+                for item in self.accommodations[room_name]:
+                    output += self.employees[item] + "\n"
             elif room_name in self.offices.keys():
+                output += "\n"
                 output += room_name.upper() + "\n"
                 output += "-----------------------------------------------\n"
-                output += ", ".join(self.offices[room_name]) + "\n"
+                for item in self.offices[room_name]:
+                    output += self.employees[item] + "\n"
         print(output)
         if filename is not None:
             with open('data/output/' + filename, 'w') as outfile:
                 outfile.write(output)
-                print("Allocations saved to: {}".format(filename))
+                print("\nAllocations saved to: {}\n".format(filename))
 
-    def print_unallocated(self, filename):
+    def print_unallocated(self, filename=None):
         """
         Prints out list of all people who have not been allocated a room and save it to an external .txt file
         ___________________________________________________________________________________________________
@@ -327,64 +351,139 @@ class Amity(object):
         :return:
         """
         if len(self.unallocated) == 0:
-            return "There are no unallocated people"
+            return "\nThere are no unallocated people\n"
         else:
-            output = "UNALLOCATED PEOPLE"
-            output += "________________________________"
+            output = "\nUNALLOCATED PEOPLE\n"
+            output += "-------------------------------------\n"
             for item in self.unallocated:
-                output += item
+                output += self.employees[item] + "\n"
             print(output)
             if filename is not None:
                 with open('data/output/' + filename, 'w') as outfile:
                     outfile.write(output)
-                    print("Allocations saved to: {}".format(filename))
+                    print("\nAllocations saved to: {}\n".format(filename))
 
-    def save_state(self, args):  # work in progress
+    def save_state(self, filename=None):  # work in progress
         """
         save all data in amity to a specified database
         _____________________________________________________________________________________
-        :param args:
+        :param filename:
         :return:
         """
-        if args["--db"]:
-            database_name = args["--db"]
-        else:
-            database_name = "kuokoa.db"
-        self.conn = sqlite3.connect(database_name)
-        self.cur = self.conn.cursor()
-        self.cur.execute("DROP TABLE IF EXISTS Employees")
-        self.cur.execute("DROP TABLE IF EXISTS Rooms")
-        self.cur.execute("DROP TABLE IF EXISTS State")
-        self.create_table(database_name)
+        if filename is not None:
+            database_name = filename
+        self.conn = sqlite3.connect('data/states/' + database_name)
+        self.c = self.conn.cursor()
+        self.c.execute("DROP TABLE IF EXISTS EMPLOYEES")
+        self.c.execute("DROP TABLE IF EXISTS FELLOWS")
+        self.c.execute("DROP TABLE IF EXISTS STAFF")
+        self.c.execute("DROP TABLE IF EXISTS ROOMS")
+        self.c.execute("DROP TABLE IF EXISTS OFFICES")
+        self.c.execute("DROP TABLE IF EXISTS ACCOMMODATIONS")
+        self.c.execute("DROP TABLE IF EXISTS STATE")
+        self.create_db_table(database_name)
 
+        for p_id in self.employees.keys():
+            self.c.execute("INSERT INTO EMPLOYEES(NAME, ID_NO) VALUES(?, ?)", [p_id, self.employees[p_id]])
         self.conn.commit()
 
-    def create_table(self, database_name):
-        """
-        Creates table in the database
-        _______________________
-        :param database_name:
-        :return:
-        """
-        self.conn = sqlite3.connect(database_name)
-        self.cur = self.conn.cursor()
+        for p_id in self.fellows.keys():
+            self.c.execute("INSERT INTO FELLOWS(NAME, ID_NO) VALUES(?, ?)", [p_id, self.fellows[p_id]])
+        self.conn.commit()
 
+        for p_id in self.staff.keys():
+            self.c.execute("INSERT INTO STAFF(NAME, ID_NO) VALUES(?, ?)", [p_id, self.staff[p_id]])
+        self.conn.commit()
+
+        for name in self.rooms:
+            self.c.execute("INSERT INTO ROOMS(ROOMNAME) VALUES(?)", [name])
+        self.conn.commit()
+
+        for r_name in self.offices.keys():
+            self.c.execute("INSERT INTO OFFICES(ROOMNAME, OCCUPANTS) \
+                            VALUES(?, ?)", [r_name, str(self.offices[r_name])])
+        self.conn.commit()
+
+        for r_name in self.accommodations.keys():
+            self.c.execute("INSERT INTO ACCOMMODATIONS(ROOMNAME, OCCUPANTS) \
+                              VALUES(?, ?)", [r_name, str(self.accommodations[r_name])])
+        self.conn.commit()
+
+        data = (self.rooms, self.offices, self.employees, self.accommodations,
+                self.fellows, self.staff, self.allocated, self.unallocated)
+        save_data = pickle.dumps(data)
+        appdata = sqlite3.Binary(save_data)
+        self.c.execute("INSERT INTO STATE(State) VALUES(?)", (appdata,))
+        self.conn.commit()
+        print("\nRecords created successfully!\n")
+        
+    def create_db_table(self, database_name):
+        """
+        creates a database table
+        ______________________________________________
+        :param database_name: The name of the database that the tables will be create in
+        :return: success message that the tables have been created successfully.
+        """
+        self.conn = sqlite3.connect('data/states/' + database_name)
+        print("\nOpened " + database_name + " successfully!\n")
+        self.c = self.conn.cursor()
         try:
-            self.cur.execute('''CREATE TABLE IF NOT EXISTS Employees(
-                                id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Role TEXT, id_no TEXT)''')
+            self.c.execute('''CREATE TABLE IF NOT EXISTS EMPLOYEES
+                                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    NAME           TEXT ,
+                                    ID_NO            TEXT);''')
 
-            self.cur.execute('''CREATE TABLE IF NOT EXISTS Rooms(
-                                        id INTEGER PRIMARY KEY AUTOINCREMENT, Room_Name TEXT, Room_Type TEXT)''')
+            self.c.execute('''CREATE TABLE IF NOT EXISTS FELLOWS
+                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        NAME           TEXT ,
+                        ID_NO            TEXT);''')
 
-            self.cur.execute('''CREATE TABLE IF NOT EXISTS State(State BLOB)''')
+            self.c.execute('''CREATE TABLE IF NOT EXISTS STAFF
+                                    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    NAME           TEXT ,
+                                    ID_NO            TEXT);''')
+
+            self.c.execute('''CREATE TABLE IF NOT EXISTS ROOMS
+                            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            ROOMNAME           TEXT);''')
+
+            self.c.execute('''CREATE TABLE IF NOT EXISTS OFFICES
+                                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        ROOMNAME           TEXT ,
+                                        OCCUPANTS            TEXT);''')
+
+            self.c.execute('''CREATE TABLE IF NOT EXISTS ACCOMMODATIONS
+                                        (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        ROOMNAME           TEXT ,
+                                        OCCUPANTS            TEXT);''')
+
+            self.c.execute('''CREATE TABLE IF NOT EXISTS STATE
+                            (State BLOB);''')
         except sqlite3.IntegrityError:
             return False
 
-    def load_state(self, args):
+        print("\nTable created successfully\n")
+
+    def load_state(self, filename=None):
         """
         Load application state that was saved in the database
         ___________________________________________________________________________________________________
-        :param args:
+        :param filename:
         :return:
         """
-        pass
+        if filename is not None:
+            database_name = filename
+        self.conn = sqlite3.connect('data/states/' + database_name)
+        self.c = self.conn.cursor()
+        self.c.execute("SELECT State FROM STATE")
+        data = self.c.fetchone()[0]
+        state = pickle.loads(data)
+        self.rooms = state[0]
+        self.offices = state[1]
+        self.employees = state[2]
+        self.accommodations = state[3]
+        self.fellows = state[4]
+        self.staff = state[5]
+        self.allocated = state[6]
+        self.unallocated = state[7]
+        print("\n app data successfully loaded!\n")
