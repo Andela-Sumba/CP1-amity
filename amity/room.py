@@ -1,3 +1,7 @@
+from abc import ABCMeta
+from abc import abstractmethod
+
+
 class Room(object):
     """
         Class: Room
@@ -6,7 +10,9 @@ class Room(object):
         in the amity application. Relies on the information it gets from
         the child classes LivingSpace and Office
     """
+    __metaclass__ = ABCMeta
 
+    @abstractmethod
     def __init__(self, room_name, room_type, capacity):
         self.room_name = room_name
         self.room_type = room_type
@@ -22,7 +28,7 @@ class Office(Room):
     """
 
     def __init__(self, room_name):
-        super(Office, self).__init__(room_name, "office", 6)
+        super(Office, self).__init__(room_name, "office", capacity=6)
 
 
 class LivingSpace(Room):
@@ -34,4 +40,4 @@ class LivingSpace(Room):
     """
 
     def __init__(self, room_name):
-        super(LivingSpace, self).__init__(room_name, "livingspace", 6)
+        super(LivingSpace, self).__init__(room_name, "livingspace", capacity=4)
