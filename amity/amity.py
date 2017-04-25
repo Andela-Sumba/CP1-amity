@@ -5,8 +5,8 @@ import sqlite3
 import pickle
 import sys
 
-from amity.person import Person, Fellow, Staff
-from amity.room import Room, LivingSpace, Office
+from person import Person, Fellow, Staff
+from room import Room, LivingSpace, Office
 
 if os.path.exists('amity'):
     os.chdir('amity')
@@ -48,22 +48,26 @@ class Amity(object):
         self.unallocated = []
         self.allocated = []
 
-    def create_room(self, room_list):
+    def create_room(self, room_list, room_type):
         """
         create rooms in amity that are either of type offices or accommodations
         ________________________________________________________________________
         :param room_list: the unique list of room names
+        :param room_type:
         :return: success message
         """
+        zero = 0
         total_rooms = len(self.rooms)
         for name in room_list:
             if name in self.rooms:
                 name_index = self.rooms.index(name)
                 self.rooms.pop(name_index)
-                print("The room " + name + " already exists cannot create duplicate rooms")
-        if len(room_list) != 0:
-            if "office" in room_list:
-                room_list.pop()
+                msg = "\nThe room " + name + " already exists cannot create duplicate rooms\n"
+                print(msg)
+        if len(room_list) is not zero:
+            if room_type == "office":
+                if "OFFICE" in room_list:
+                    return "to specify the type of room use --o for type office, --ls for livingspace"
                 for room_name in room_list:
                     new_office = Office(room_name)
                     self.rooms.append(new_office.room_name)
@@ -74,8 +78,9 @@ class Amity(object):
                 else:
                     return " The office has been created successfully!"
 
-            elif "livingspace" in room_list:
-                room_list.pop()
+            elif room_type == "livingspace":
+                if "LIVINGSPACE" in room_list:
+                    return "to specify the type of room use --o for type office, --ls for livingspace"
                 for room_name in room_list:
                     new_accommodation = LivingSpace(room_name)
                     self.rooms.append(new_accommodation.room_name)
@@ -109,6 +114,7 @@ class Amity(object):
         """
         self.allocated = False
         if role.upper() == "FELLOW":
+            msg = ""
             new_fellow = Fellow(name)
             new_id_no = new_fellow.id_no
             self.employees[new_id_no] = new_fellow.name
@@ -120,13 +126,16 @@ class Amity(object):
 
             if not self.allocated:
                 self.unallocated.append(new_id_no)
+                msg += "added to unallocated list\n"
 
             if new_id_no in self.employees.keys() and self.fellows.keys():
-                return "The fellow " + new_fellow.name + " has been added successfully to the system\n"
+                msg += "The fellow " + new_fellow.name + " has been added successfully to the system\n"
             else:
-                return "error!!! person not add properly\n"
+                msg = "error!!! person not add properly\n"
+            return msg
 
         elif role.upper() == "STAFF":
+            msg = ""
             new_staff = Staff(name)
             new_id_no = new_staff.id_no
             self.employees[new_id_no] = new_staff.name
@@ -134,15 +143,17 @@ class Amity(object):
             self.allocate_office(new_id_no)
 
             if accommodate == "Y":  # check that amity does not allocate staff accommodation
-                print("staff can not be allocated accommodation\n")
+                msg += "staff can not be allocated accommodation\n"
 
             if not self.allocated:
                 self.unallocated.append(new_id_no)
+                msg += "add to unallocated list\n"
 
             if new_id_no in self.employees.keys() and self.staff.keys():
-                return "The staff " + new_staff.name + " has been added successfully to the system\n"
+                msg += "The staff " + new_staff.name + " has been added successfully to the system\n"
             else:
-                return "error!!! person not add properly\n"
+                msg = "error!!! person not add properly\n"
+            return msg
 
         else:
             return "Please specify the persons role\n"
@@ -154,7 +165,8 @@ class Amity(object):
         :param new_id_no: id number of the person
         :return: success or failure message
         """
-        if len(self.rooms) == 0:
+        zero = 0
+        if len(self.rooms) is zero:
             msg = "The system has no available rooms"
             return msg
 
@@ -164,6 +176,8 @@ class Amity(object):
                 vacant_offices.append(room)
         if len(vacant_offices) == 0:
             print("The system has no available office space")
+            if new_id_no in self.unallocated:
+                self.unallocated.append(new_id_no)
         else:
             workspace = random.choice(vacant_offices)
             self.offices[workspace].append(new_id_no)
@@ -178,7 +192,8 @@ class Amity(object):
         :param new_id_no: id number of fellow being allocated:
         :return: success or failure message
         """
-        if len(self.rooms) == 0:
+        zero = 0
+        if len(self.rooms) is zero:
             msg = "The system has no available rooms"
             return msg
 
@@ -188,7 +203,8 @@ class Amity(object):
                 vacant_accommodation.append(room)
         if len(vacant_accommodation) == 0:
             print("The system has no available accommodations")
-            self.unallocated.append(new_id_no)
+            if new_id_no in self.unallocated:
+                self.unallocated.append(new_id_no)
         else:
             workspace = random.choice(vacant_accommodation)
             self.accommodations[workspace].append(new_id_no)
@@ -204,11 +220,19 @@ class Amity(object):
         :return: prints out id_no of the person being searched
         """
         if search_name not in list(self.employees.values()):
-            print("The person is not in system")
+            return "The person is not in system"
         else:
             for id_no, name in self.employees.items():
                 if name == search_name:
-                    print(id_no)
+                    output = "ID: "
+                    output += id_no
+                    if id_no in self.fellows.keys():
+                        output += " ROLE: FELLOW "
+                        output += "NAME: " + self.employees[id_no]
+                    if id_no in  self.staff.keys():
+                        output += " ROLE: STAFF "
+                        output += "NAME: " + self.employees[id_no]
+                    return output
 
     def reallocate_person(self, id_no, room_name):
         """
@@ -227,6 +251,8 @@ class Amity(object):
         elif new_room in self.offices.keys() and len(self.offices[new_room]) < 6:
             vacant_room.append(new_room)
         for room in vacant_room:
+            if id_no in self.offices[room]:
+                return "The person is already allocated to the room"
             if id_no in self.staff.keys():
                 if room in self.accommodations.keys():
                     return "Staff can not be allocated a living space"
@@ -235,16 +261,24 @@ class Amity(object):
                         for item in self.offices[saved_room]:
                             if item == id_no:
                                 self.offices[saved_room].remove(item)
-                    self.offices[room].append(id_no)
+                    if id_no not in self.offices[room]:
+                        self.offices[room].append(id_no)
+                    else:
+                        return "The person is already allocated to the room"
                     if id_no in self.offices[room]:
-                        print(self.employees[id_no] + " has been successfully moved to: " + room)
+                        return self.employees[id_no] + " has been successfully moved to: " + room
             if id_no in self.fellows.keys():
                 if room in self.accommodations.keys():
+                    if id_no in self.accommodations[room]:
+                        return "The person is already allocated to the room"
                     for saved_room, saved_id_no in self.accommodations.items():
                         for item in self.accommodations[saved_room]:
                             if item == id_no:
                                 self.accommodations[saved_room].remove(item)
-                    self.accommodations[room].append(id_no)
+                    if id_no not in self.accommodations[room]:
+                        self.accommodations[room].append(id_no)
+                    else:
+                        return "The person is already allocated to the room"
                     if id_no in self.accommodations[room]:
                         print(self.employees[id_no] + " has been successfully moved to: " + room)
                 else:
@@ -263,12 +297,13 @@ class Amity(object):
         :param room_name: name of room to print
         :return: prints a list of all occupants in the room
         """
-        print_name = room_name.capitalize()
+        zero = 0
+        print_name = room_name.upper()
         if print_name not in self.rooms:
             return "There is no room " + print_name + " in system!"
-        if print_name in list(self.offices.keys()) and len(self.offices[print_name]) == 0:
+        if print_name in list(self.offices.keys()) and len(self.offices[print_name]) is zero:
             return print_name + " is empty!"
-        elif print_name in list(self.accommodations.keys()) and len(self.accommodations[print_name]) == 0:
+        elif print_name in list(self.accommodations.keys()) and len(self.accommodations[print_name]) is zero:
             return print_name + " is empty!"
         else:
             header = "The members of room " + print_name + ":\n"
@@ -296,11 +331,11 @@ class Amity(object):
                 with open('data/input/' + textfile, 'r') as file:
                     people = file.readlines()
                     for person in people:
-                        p_details = person.split()
-                        role = p_details[0].upper()
-                        name = p_details[1].upper() + " " + p_details[2].upper()
-                        if len(p_details) > 3:
-                            accommodate = p_details[3].upper()
+                        person_details = person.split()
+                        role = person_details[0].upper()
+                        name = person_details[1].upper() + " " + person_details[2].upper()
+                        if len(person_details) > 3:
+                            accommodate = person_details[3].upper()
                         else:
                             accommodate = "N"
                         print(self.add_person(role, name, accommodate))
@@ -318,12 +353,12 @@ class Amity(object):
         occupied_rooms = []
         output = "ROOM ALLOCATIONS\n"
         for room in self.rooms:
-            if room in self.accommodations.keys() and len(self.accommodations[room]) != 0:
+            if room in self.accommodations.keys() and len(self.accommodations[room]) is not 0:
                 occupied_rooms.append(room)
-            elif room in self.offices.keys() and len(self.offices[room]) != 0:
+            elif room in self.offices.keys() and len(self.offices[room]) is not 0:
                 occupied_rooms.append(room)
-        if len(occupied_rooms) == 0:
-            return "There are no occupied rooms in amity!"
+        if len(occupied_rooms) is 0:
+            output = "There are no occupied rooms in amity!\n"
         for room_name in occupied_rooms:
             if room_name in self.accommodations.keys():
                 output += "\n"
@@ -337,11 +372,12 @@ class Amity(object):
                 output += "-----------------------------------------------\n"
                 for item in self.offices[room_name]:
                     output += self.employees[item] + "\n"
-        print(output)
+
         if filename is not None:
             with open('data/output/' + filename, 'w') as outfile:
                 outfile.write(output)
                 return "\nAllocations saved to: {}\n".format(filename)
+        return output
 
     def print_unallocated(self, filename=None):
         """
@@ -350,18 +386,18 @@ class Amity(object):
         :param filename:
         :return:
         """
-        if len(self.unallocated) == 0:
+        if len(self.unallocated) is 0:
             return "\nThere are no unallocated people\n"
         else:
             output = "\nUNALLOCATED PEOPLE\n"
             output += "-------------------------------------\n"
             for item in self.unallocated:
                 output += self.employees[item] + "\n"
-            print(output)
             if filename is not None:
                 with open('data/output/' + filename, 'w') as outfile:
                     outfile.write(output)
                     print("\nAllocations saved to: {}\n".format(filename))
+        return output
 
     def save_state(self, filename=None):  # work in progress
         """
@@ -383,30 +419,30 @@ class Amity(object):
         self.c.execute("DROP TABLE IF EXISTS STATE")
         self.create_db_table(database_name)
 
-        for p_id in self.employees.keys():
-            self.c.execute("INSERT INTO EMPLOYEES(NAME, ID_NO) VALUES(?, ?)", [p_id, self.employees[p_id]])
+        for person_id in self.employees.keys():
+            self.c.execute("INSERT INTO EMPLOYEES(NAME, ID_NO) VALUES(?, ?)", [person_id, self.employees[person_id]])
         self.conn.commit()
 
-        for p_id in self.fellows.keys():
-            self.c.execute("INSERT INTO FELLOWS(NAME, ID_NO) VALUES(?, ?)", [p_id, self.fellows[p_id]])
+        for person_id in self.fellows.keys():
+            self.c.execute("INSERT INTO FELLOWS(NAME, ID_NO) VALUES(?, ?)", [person_id, self.fellows[person_id]])
         self.conn.commit()
 
-        for p_id in self.staff.keys():
-            self.c.execute("INSERT INTO STAFF(NAME, ID_NO) VALUES(?, ?)", [p_id, self.staff[p_id]])
+        for person_id in self.staff.keys():
+            self.c.execute("INSERT INTO STAFF(NAME, ID_NO) VALUES(?, ?)", [person_id, self.staff[person_id]])
         self.conn.commit()
 
         for name in self.rooms:
             self.c.execute("INSERT INTO ROOMS(ROOMNAME) VALUES(?)", [name])
         self.conn.commit()
 
-        for r_name in self.offices.keys():
+        for room_name in self.offices.keys():
             self.c.execute("INSERT INTO OFFICES(ROOMNAME, OCCUPANTS) \
-                            VALUES(?, ?)", [r_name, str(self.offices[r_name])])
+                            VALUES(?, ?)", [room_name, str(self.offices[room_name])])
         self.conn.commit()
 
-        for r_name in self.accommodations.keys():
+        for room_name in self.accommodations.keys():
             self.c.execute("INSERT INTO ACCOMMODATIONS(ROOMNAME, OCCUPANTS) \
-                              VALUES(?, ?)", [r_name, str(self.accommodations[r_name])])
+                              VALUES(?, ?)", [room_name, str(self.accommodations[room_name])])
         self.conn.commit()
 
         data = (self.rooms, self.offices, self.employees, self.accommodations,
@@ -416,7 +452,7 @@ class Amity(object):
         self.c.execute("INSERT INTO STATE(State) VALUES(?)", (appdata,))
         self.conn.commit()
         return "\nRecords created successfully!\n"
-        
+
     def create_db_table(self, database_name):
         """
         creates a database table
