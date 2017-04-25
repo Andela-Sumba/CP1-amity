@@ -69,10 +69,10 @@ def app_header():
    """
     os.system("clear")
     print("\n")
-    cprint(figlet_format('AMITY', font='roman'), 'green')
-    cprint('--------------------------------------------------------------------------', 'magenta')
+    cprint(figlet_format('AMITY', font='epic'), 'yellow')
+    cprint('--------------------------------------------------------------------------', 'red')
     cprint("\tAmity is a simple Commandline Room Allocation App.", 'yellow')
-    cprint('--------------------------------------------------------------------------', 'magenta')
+    cprint('--------------------------------------------------------------------------', 'red')
     cprint("\n\tType 'help' to see a full list of commands\n", 'white')
 
 
@@ -94,10 +94,10 @@ class AmityCLI(cmd.Cmd):
         ----------------------------------------------------------------------
         Usage: add_person <role> <firstname> <surname> [<accommodate>]
         """
-        role = args['<role>'].capitalize()
-        name = args['<firstname>'].capitalize()
-        name += " " + args['<surname>'].capitalize()
-        if role != "Fellow" and role != "Staff":
+        role = args['<role>'].upper()
+        name = args['<firstname>'].upper()
+        name += " " + args['<surname>'].upper()
+        if role != "FELLOW" and role != "STAFF":
             print("Please check your arguments."
                   "\n- <role> can either be 'Fellow' or 'Staff' "
                   "only.\n- Type 'help add_person' for more information",
@@ -126,12 +126,14 @@ class AmityCLI(cmd.Cmd):
         """
         room_args = []
         for room_name in args["<room_name>"]:
-            room_args.append(room_name.capitalize())
+            room_args.append(room_name.upper())
         if args['--ls'] is True:
-            room_args.append("livingspace")
+            room_type = "livingspace"
         elif args['--o'] is True:
-            room_args.append("office")
-        print(amity.create_room(room_args))
+            room_type = "office"
+        else:
+            room_type = "office"
+        print(amity.create_room(room_args, room_type))
 
     @docopt_cmd
     def do_reallocate_person(self, args):
@@ -212,19 +214,14 @@ class AmityCLI(cmd.Cmd):
         print(amity.load_state(args['--db']))
 
     @docopt_cmd
-    def do_list_available_rooms(self, args):
-        """ Usage: list_available_rooms """
-        print(amity.list_available_rooms())
-
-    @docopt_cmd
     def do_get_id(self, args):
         """
         gets the id number that belongs to the person add prints it
        _________________________________________________________
         Usage: get_id <firstname> <surname>
         """
-        search_name = args['<firstname>'].capitalize()
-        search_name += " " + args['<surname>'].capitalize()
+        search_name = args['<firstname>'].upper()
+        search_name += " " + args['<surname>'].upper()
         print(amity.get_person_id(search_name))
 
     def do_quit(self, args):
