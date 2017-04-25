@@ -1,15 +1,24 @@
+
+import random
+from abc import ABCMeta
+from abc import abstractmethod
+
+
 class Person(object):
     """
         class Person:
         ______________
-        The Person class is a super class that handles the creation of Peopl
+        The Person class is an abstract class that handles the creation of Peopl
         in the amity application. Relies on the information it gets from
         the child classes Fellow and Office
     """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
     def __init__(self, name, role):
         self.name = name
         self.role = role
-        self.id_no = str(id(self))
+        self.id_no = str(random.choice(range(1, 10000000)))
 
 
 class Fellow(Person):
