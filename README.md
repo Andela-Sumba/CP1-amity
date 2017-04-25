@@ -13,7 +13,9 @@ Navigate to the CP1-amity directory
 
 Create a vitual environment:
 https://virtualenv.pypa.io/en/stable/userguide/
+
 install packages:
+
 ```$ pip install -r requirements.txt```
 
 ### Testing
