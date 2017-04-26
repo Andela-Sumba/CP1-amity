@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/Andela-Sumba/CP1-amity/badge.svg?branch=develop)](https://coveralls.io/github/Andela-Sumba/CP1-amity?branch=develop)
+
 # Amity Space Allocation
 
 Amity is a Python Console Application manages 
